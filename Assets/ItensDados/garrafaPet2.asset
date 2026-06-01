@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d91e254d2ceed3c4aad2600d461e9ee0, type: 3}
+  m_Name: garrafaPet2
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  idItemAutomatico: 8d49eedf-2470-43c7-8d44-78ed995afde8
+  nomeVisivel: Garrafa Pet 2
+  categoria: 1
+  iconeParaUI: {fileID: -3544732216662798235, guid: e29f2add3ea33f3488eb2a14e93be069, type: 3}
+  valorVenda: 2
