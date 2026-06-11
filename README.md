@@ -10,12 +10,13 @@ Jogo 2D de triagem, crafting e economia baseado em reciclagem. Separe o lixo na 
 
 ### Implementado
 - Esteira com spawn contínuo e movimento automático dos itens
-- Jogador com movimento livre e inventário de mão única (1 item por vez)
+- **Alavanca de Controle**: Permite ligar/desligar a esteira a qualquer momento
+- Jogador com movimento livre, **sistema de corrida (Shift)** e inventário de mão única
 - Lixeiras categorizadas com armazenamento em pilha (LIFO)
 - Penalidade ao depositar item na lixeira errada
 - Penalidade ao deixar item cair no fim da esteira
 - Triturador que processa lixo não reciclável em lote e gera Cubo de Sucata
-- GameManager com cronômetro regressivo, saldo de dinheiro e sistema de vidas
+- GameManager com cronômetro regressivo, saldo de dinheiro, vidas e **estado global da esteira**
 - UI de HUD: dinheiro atual / meta, timer no formato MM:SS
 
 ### Em desenvolvimento / Incompleto
@@ -33,20 +34,18 @@ Jogo 2D de triagem, crafting e economia baseado em reciclagem. Separe o lixo na 
 
 ## Mecânicas Implementadas
 
-### Esteira (`EsteiraSpawner.cs` / `MoverNaEsteira.cs`)
-Um ponto de spawn no início da esteira instancia itens aleatórios em intervalo configurável. O movimento dos itens agora é gerenciado pela própria esteira (`MoverNaEsteira.cs`) através de um gatilho (Trigger), empurrando qualquer objeto com a tag "Item" que esteja sobre ela. Você pode escolher a direção (Direita, Esquerda, Cima ou Baixo) diretamente no Inspector. Se chegar ao fim da esteira sem ser recolhido, é destruído e o jogador perde uma vida.
+### Esteira (`EsteiraSpawner.cs` / `MoverNaEsteira.cs` / `AlavancaEsteira.cs`)
+Um ponto de spawn no início da esteira instancia itens aleatórios em intervalo configurável. O movimento dos itens é gerenciado pela própria esteira (`MoverNaEsteira.cs`) através de um gatilho (Trigger).
+- **Alavanca**: O jogador pode interagir com uma alavanca (tecla `E`) para ligar ou desligar o movimento e o spawn da esteira globalmente.
+- **Direções**: Suporte a movimento para Direita, Esquerda, Cima ou Baixo.
+- **Destaque**: Itens e objetos interativos possuem feedback visual de destaque.
 
 ### Jogador (`MovePlayer.cs` / `PlayerInteract.cs`)
-Movimento 2D via novo Input System com velocidade padrão de 7. O sprite é espelhado conforme a direção do movimento.
-
-**Interação (tecla `E`):**
-- Mão vazia → verifica raio de 1,5u ao redor:
-  1. Tenta retirar item da Lixeira mais próxima
-  2. Tenta pegar item solto na esteira
-- Segurando item → verifica raio de 1,5u ao redor:
-  1. Tenta depositar na Lixeira mais próxima
-  2. Tenta alimentar o Triturador
-  3. Solta o item no chão
+Movimento 2D via novo Input System com velocidade configurável.
+- **Velocidade**: 7 (Normal) / 12 (Correndo com `Shift`).
+- **Interação (tecla `E`)**:
+  - Mão vazia → Retira item da Lixeira, usa Alavanca ou pega item do chão.
+  - Segurando item → Deposita na Lixeira, alimenta Triturador, usa Alavanca ou solta no chão.
 
 ### Lixeiras (`Lixeira.cs`)
 Cada lixeira aceita apenas uma categoria. O armazenamento é uma pilha LIFO com capacidade máxima de 20 itens. Um TextMeshPro flutuante exibe `atual/máximo` em tempo real.
@@ -68,18 +67,20 @@ Aceita apenas itens não recicláveis. Processa em lote de **10 itens**, com **2
 - Exibe contagem regressiva em tela
 
 ### GameManager (`GameManager.cs`)
-Singleton. Controla o estado global da partida:
+Singleton. Controla o estado global da partida e configurações globais:
 
 | Variável | Valor padrão |
 |---|---|
-| Dinheiro inicial | R$ 0 |
 | Meta financeira | R$ 500 |
-| Tempo da rodada | 105 segundos (1:45) |
+| Tempo da rodada | 105 segundos |
 | Vidas | 3 |
+| **Velocidade Esteira** | 2.0 |
+| **Intervalo Spawn** | 3.0 |
+| **Escala Global Itens** | 1.0 |
 
-- **`AdicionarDinheiro(int valor)`** — soma ao saldo e verifica meta
-- **`AplicarPenalidade()`** — decrementa vidas; `vidas <= 0` loga "Game Over"
-- **`AtualizarUITempo()`** — formata `float` segundos para `MM:SS`
+- **`esteiraAtiva`**: Boolean que trava/destrava todo o sistema de logística.
+- **`AdicionarDinheiro(int valor)`** — soma ao saldo e verifica meta.
+- **`AplicarPenalidade()`** — decrementa vidas; `vidas <= 0` loga "Game Over".
 
 ---
 
@@ -95,8 +96,6 @@ Singleton. Controla o estado global da partida:
 | Fralda Suja | Não Reciclável | R$ 0 |
 | Esponja Velha | Não Reciclável | R$ 0 |
 | Cubo de Sucata *(output do Triturador)* | Não Reciclável | R$ 5 |
-
-> Itens pendentes de criação: Pedaço de Fio de Cobre, Garrafa de Cerveja, Pote de Geleia, Casca de Banana.
 
 ---
 
@@ -137,15 +136,17 @@ Singleton. Controla o estado global da partida:
 ```
 Assets/Scripts/
 ├── ItemData.cs          — ScriptableObject: nome, categoria, ícone, valor
-├── ItemColetavel.cs     — Componente do item em cena; aplica sprite do ItemData
-├── MovePlayer.cs        — Movimento 2D do jogador (novo Input System)
-├── PlayerInteract.cs    — Inventário (1 item) e lógica de pegar/soltar/depositar
-├── Lixeira.cs           — Bin de triagem com pilha LIFO e validação de categoria
-├── MoverNaEsteira.cs    — Gerencia o movimento dos itens sobre a esteira via Trigger
-├── EsteiraSpawner.cs    — Instancia itens aleatórios no ponto de spawn por timer
-├── FimDaEsteira.cs      — Trigger no fim da esteira; destrói item e aplica penalidade
-├── Triturador.cs        — Processador em lote (10 itens); gera Cubo de Sucata
-└── GameManager.cs       — Singleton: dinheiro, timer, vidas, HUD
+├── ItemColetavel.cs     — Componente do item; aplica sprite e escala global
+├── MovePlayer.cs        — Movimento 2D e sistema de Sprint (Shift)
+├── PlayerInteract.cs    — Lógica de interação universal (E)
+├── AlavancaEsteira.cs   — Controle visual e lógico da esteira
+├── DestaqueObjeto.cs    — Feedback visual ao chegar perto de objetos
+├── Lixeira.cs           — Bin de triagem com pilha LIFO
+├── MoverNaEsteira.cs    — Movimento físico sobre a esteira via Trigger
+├── EsteiraSpawner.cs    — Instancia itens respeitando estado global
+├── FimDaEsteira.cs      — Trigger de perda de item
+├── Triturador.cs        — Processador de sucata
+└── GameManager.cs       — Centralizador de regras, economia e estados
 ```
 
 ---
