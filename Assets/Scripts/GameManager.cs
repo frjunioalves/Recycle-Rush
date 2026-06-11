@@ -24,6 +24,15 @@ public class GameManager : MonoBehaviour
     [Header("Sistema de Vidas")]
     public int vidas = 3;
 
+    [Header("Configurações Globais da Esteira")]
+    public float velocidadeGlobalEsteira = 2f;
+    public float intervaloSpawnGlobal = 3f;
+    public bool esteiraAtiva = true; // Nova variável para ligar/desligar
+
+    [Header("Configurações Globais de Itens")]
+    [Tooltip("Controla o tamanho de todos os itens spawnados na esteira")]
+    public float escalaGlobalItens = 1f;
+
     private void Awake()
     {
         if (Instance == null)

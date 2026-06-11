@@ -123,12 +123,7 @@ public class Triturador : MonoBehaviour
             {
                 scriptColetavel.ConfigurarItem(dadoCuboSucata);
             }
-
-            MoverNaEsteira scriptMovimento = novoDrop.GetComponent<MoverNaEsteira>();
-            if (scriptMovimento != null)
-            {
-                scriptMovimento.PegarItem(); // Muda a variável estaNaEsteira para false
-            }
+           
         }
         else
         {

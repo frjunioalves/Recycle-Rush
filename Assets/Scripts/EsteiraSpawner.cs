@@ -3,38 +3,52 @@ using UnityEngine;
 public class EsteiraSpawner : MonoBehaviour
 {
     [Header("Configurações de Spawn")]
-    public GameObject[] itensPrefabs; // Arraste os prefabs dos itens aqui no Inspector
-    public float tempoEntreSpawns = 2f; // Tempo em segundos entre cada spawn
+    [Tooltip("Arraste o seu único prefab base (ex: lixo_prefab) aqui")]
+    public GameObject prefabItemGenerico; 
+    
+    [Tooltip("Arraste os arquivos .asset dos lixos (garrafaPet, papelao, etc) aqui")]
+    public ItemData[] lixosDisponiveis; 
     
     private float timer;
-
+    
     void Update()
     {
-        // Incrementa o timer com o tempo que passou desde o último frame
+        // Só funciona se a esteira estiver ativa no GameManager
+        if (GameManager.Instance != null && !GameManager.Instance.esteiraAtiva) return;
+
         timer += Time.deltaTime;
 
-        // Verifica se é hora de instanciar um novo item
-        if (timer >= tempoEntreSpawns)
+        // Puxa o intervalo de spawn do GameManager
+        float intervalo = GameManager.Instance != null ? GameManager.Instance.intervaloSpawnGlobal : 2f;
+
+        if (timer >= intervalo)
         {
             InstanciarItem();
-            timer = 0f; // Reseta o timer
+            timer = 0f; 
         }
     }
 
     void InstanciarItem()
     {
-        // Previne erros caso a lista de prefabs esteja vazia
-        if (itensPrefabs.Length == 0)
+        // Verifica se configurou tudo certinho
+        if (prefabItemGenerico == null || lixosDisponiveis.Length == 0)
         {
-            Debug.LogWarning("Nenhum prefab foi atribuído ao EsteiraSpawner!");
+            Debug.LogWarning("Falta configurar o prefab ou a lista de lixos no Spawner!");
             return;
         }
 
-        // Escolhe um item aleatório do array
-        int indexAleatorio = Random.Range(0, itensPrefabs.Length);
-        GameObject itemEscolhido = itensPrefabs[indexAleatorio];
+        // 1. Cria a "casca" vazia (o seu prefab genérico)
+        GameObject novoItem = Instantiate(prefabItemGenerico, transform.position, transform.rotation);
 
-        // Instancia o item na posição e rotação do Spawner
-        Instantiate(itemEscolhido, transform.position, transform.rotation);
+        // 2. Sorteia qual será a "alma" do lixo (os dados)
+        int indexAleatorio = Random.Range(0, lixosDisponiveis.Length);
+        ItemData dadoSorteado = lixosDisponiveis[indexAleatorio];
+
+        // 3. Pega o script ItemColetavel do objeto recém-criado e injeta os dados sorteados
+        ItemColetavel coletavel = novoItem.GetComponent<ItemColetavel>();
+        if (coletavel != null)
+        {
+            coletavel.ConfigurarItem(dadoSorteado); // Isso vai chamar o AtualizarVisual() que você criou!
+        }
     }
 }

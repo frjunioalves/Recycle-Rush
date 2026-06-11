@@ -34,7 +34,7 @@ Jogo 2D de triagem, crafting e economia baseado em reciclagem. Separe o lixo na 
 ## Mecânicas Implementadas
 
 ### Esteira (`EsteiraSpawner.cs` / `MoverNaEsteira.cs`)
-Um ponto de spawn no início da esteira instancia itens aleatórios em intervalo configurável (padrão: 6 segundos). Cada item se move automaticamente para a esquerda. Se chegar ao fim da esteira sem ser recolhido, é destruído e o jogador perde uma vida.
+Um ponto de spawn no início da esteira instancia itens aleatórios em intervalo configurável. O movimento dos itens agora é gerenciado pela própria esteira (`MoverNaEsteira.cs`) através de um gatilho (Trigger), empurrando qualquer objeto com a tag "Item" que esteja sobre ela. Você pode escolher a direção (Direita, Esquerda, Cima ou Baixo) diretamente no Inspector. Se chegar ao fim da esteira sem ser recolhido, é destruído e o jogador perde uma vida.
 
 ### Jogador (`MovePlayer.cs` / `PlayerInteract.cs`)
 Movimento 2D via novo Input System com velocidade padrão de 7. O sprite é espelhado conforme a direção do movimento.
@@ -141,7 +141,7 @@ Assets/Scripts/
 ├── MovePlayer.cs        — Movimento 2D do jogador (novo Input System)
 ├── PlayerInteract.cs    — Inventário (1 item) e lógica de pegar/soltar/depositar
 ├── Lixeira.cs           — Bin de triagem com pilha LIFO e validação de categoria
-├── MoverNaEsteira.cs    — Translação automática do item; para ao ser pego
+├── MoverNaEsteira.cs    — Gerencia o movimento dos itens sobre a esteira via Trigger
 ├── EsteiraSpawner.cs    — Instancia itens aleatórios no ponto de spawn por timer
 ├── FimDaEsteira.cs      — Trigger no fim da esteira; destrói item e aplica penalidade
 ├── Triturador.cs        — Processador em lote (10 itens); gera Cubo de Sucata

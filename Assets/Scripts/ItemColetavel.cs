@@ -31,5 +31,12 @@ public class ItemColetavel : MonoBehaviour
                 sr.sprite = dadosDoItem.iconeParaUI;
             }
         }
+
+        // Aplica a escala global do GameManager
+        if (GameManager.Instance != null)
+        {
+            float escala = GameManager.Instance.escalaGlobalItens;
+            transform.localScale = new Vector3(escala, escala, 1f);
+        }
     }
 }

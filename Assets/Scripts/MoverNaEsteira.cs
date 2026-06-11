@@ -1,35 +1,35 @@
 using UnityEngine;
 
+public enum DirecaoEsteira { Direita, Esquerda, Cima, Baixo }
+
 public class MoverNaEsteira : MonoBehaviour
 {
     [Header("Configurações de Movimento")]
-    public float velocidade = 5f;
-    public bool moverParaEsquerda = false; 
+    public DirecaoEsteira direcaoDoMovimento = DirecaoEsteira.Direita;
 
-    [Header("Controle de Estado")]
-    // Essa variável diz se o item deve ou não se mover. 
-    // Ela começa como 'true' para os itens que nascem na esteira.
-    public bool estaNaEsteira = true; 
-
-    void Update()
+    private void OnTriggerStay2D(Collider2D other)
     {
-        // O código de movimento agora só funciona SE estaNaEsteira for verdadeiro
-        if (estaNaEsteira)
+        // Só move se a esteira estiver ativa no GameManager
+        if (GameManager.Instance != null && !GameManager.Instance.esteiraAtiva) return;
+
+        // Verifica se o objeto que entrou no gatilho tem a tag "Item"
+        if (other.CompareTag("Item"))
         {
-            Vector3 direcao = moverParaEsquerda ? Vector3.left : Vector3.right;
-            transform.Translate(direcao * velocidade * Time.deltaTime, Space.World);
+            Vector3 direcao = Vector3.right;
+
+            switch (direcaoDoMovimento)
+            {
+                case DirecaoEsteira.Direita:  direcao = Vector3.right; break;
+                case DirecaoEsteira.Esquerda: direcao = Vector3.left;  break;
+                case DirecaoEsteira.Cima:     direcao = Vector3.up;    break;
+                case DirecaoEsteira.Baixo:    direcao = Vector3.down;  break;
+            }
+            
+            // Puxa a velocidade diretamente do GameManager
+            float velocidade = GameManager.Instance != null ? GameManager.Instance.velocidadeGlobalEsteira : 2f;
+
+            // Move o item que está em cima da esteira
+            other.transform.Translate(direcao * velocidade * Time.deltaTime, Space.World);
         }
-    }
-
-    // Você pode chamar essa função no seu script de interação quando o jogador pegar o item
-    public void PegarItem()
-    {
-        estaNaEsteira = false;
-    }
-
-    // Caso o jogador solte o item de volta na esteira, você pode chamar essa
-    public void DevolverParaEsteira()
-    {
-        estaNaEsteira = true;
     }
 }

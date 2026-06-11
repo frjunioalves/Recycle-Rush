@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 6693097191739830476}
   - component: {fileID: 1697177044861995411}
   - component: {fileID: 8546195825359070877}
-  - component: {fileID: -3436466099104665023}
   - component: {fileID: 3796168731176852110}
   - component: {fileID: 3664402965366003490}
   m_Layer: 6
@@ -83,7 +82,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 9
   m_MaskInteraction: 0
   m_Sprite: {fileID: -901160056067455518, guid: 630f0fc7c8bcacc4b900b9b61393bf95, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -125,7 +124,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -141,21 +140,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &-3436466099104665023
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9185953499209038204}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56312e08c9e04e246b2098bd096c2dab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MoverNaEsteira
-  velocidade: 2
-  moverParaEsquerda: 1
-  estaNaEsteira: 1
 --- !u!114 &3796168731176852110
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -38,10 +38,11 @@ public class PlayerInteract : MonoBehaviour
 
     void TentarPegarItem()
     {
-        // 1. PRIMEIRO: Tenta ver se tem uma Lixeira perto para retirar (-1)
+        // 1. PRIMEIRO: Tenta interagir com objetos fixos (Lixeira, Alavanca, etc.)
         Collider2D[] colisoresProximos = Physics2D.OverlapCircleAll(transform.position, raioInteracao);
         foreach (Collider2D colisor in colisoresProximos)
         {
+            // Tenta ver se é uma Lixeira para retirar item
             Lixeira lixeira = colisor.GetComponent<Lixeira>();
             if (lixeira != null)
             {
@@ -52,12 +53,20 @@ public class PlayerInteract : MonoBehaviour
                     itemSeguradoAtual = itemRetirado;
                     imagemUI.sprite = itemSeguradoAtual.iconeParaUI;
                     imagemUI.enabled = true;
-                    return; // Se conseguiu tirar da lixeira, encerra a função aqui
+                    return; 
                 }
+            }
+
+            // Tenta ver se é a Alavanca da Esteira
+            AlavancaEsteira alavanca = colisor.GetComponent<AlavancaEsteira>();
+            if (alavanca != null)
+            {
+                alavanca.Interagir();
+                return; // Interagiu com a alavanca, encerra a função
             }
         }
 
-        // 2. SE NÃO ACHOU LIXEIRA: Tenta pegar um item normal do chão/esteira
+        // 2. SE NÃO ACHOU OBJETOS FIXOS: Tenta pegar um item normal do chão/esteira
         Collider2D colisorChao = Physics2D.OverlapCircle(transform.position, raioInteracao, layerItens);
         if (colisorChao != null && colisorChao.CompareTag("Item"))
         {
@@ -75,13 +84,21 @@ public class PlayerInteract : MonoBehaviour
     }
 
    void SoltarItem()
-    {
-        // 1. Tenta interagir com objetos próximos (Lixeira ou Triturador)
-        Collider2D[] colisoresProximos = Physics2D.OverlapCircleAll(transform.position, raioInteracao);
-        foreach (Collider2D colisor in colisoresProximos)
-        {
-            // Tenta colocar na Lixeira
-            Lixeira lixeira = colisor.GetComponent<Lixeira>();
+   {
+       // 1. Tenta interagir com objetos próximos (Lixeira, Triturador ou Alavanca)
+       Collider2D[] colisoresProximos = Physics2D.OverlapCircleAll(transform.position, raioInteracao);
+       foreach (Collider2D colisor in colisoresProximos)
+       {
+           // Tenta ver se é a Alavanca da Esteira (Permite ligar/desligar mesmo segurando item)
+           AlavancaEsteira alavanca = colisor.GetComponent<AlavancaEsteira>();
+           if (alavanca != null)
+           {
+               alavanca.Interagir();
+               return; 
+           }
+
+           // Tenta colocar na Lixeira
+           Lixeira lixeira = colisor.GetComponent<Lixeira>();
             if (lixeira != null)
             {
                 bool conseguiuDepositar = lixeira.ReceberItem(itemSeguradoAtual);
@@ -111,10 +128,8 @@ public class PlayerInteract : MonoBehaviour
             GameObject novoObjeto = Instantiate(prefabItemGenerico, transform.position, Quaternion.identity);
             
             ItemColetavel scriptDoItem = novoObjeto.GetComponent<ItemColetavel>();
-            MoverNaEsteira scriptMovimento = novoObjeto.GetComponent<MoverNaEsteira>();
             
             if (scriptDoItem != null) scriptDoItem.ConfigurarItem(itemSeguradoAtual);
-            if (scriptMovimento != null) scriptMovimento.PegarItem(); 
         }
         else
         {
