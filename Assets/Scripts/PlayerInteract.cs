@@ -14,6 +14,12 @@ public class PlayerInteract : MonoBehaviour
     [Header("Interface do Inventário")]
     public Image imagemUI; 
 
+    [Header("Efeitos Sonoros")]
+    public AudioSource audioInteracao; // Arraste o AudioSource do jogador aqui
+    public AudioClip somPegarItem;     // Som ao pegar um item do chão ou lixeira
+    public AudioClip somSoltarItem;    // Som ao dropar, triturar, vender ou jogar na lixeira
+    public AudioClip somInteragir;     // Som genérico para alavancas
+
     private ItemData itemSeguradoAtual = null;
 
     void Start()
@@ -53,6 +59,7 @@ public class PlayerInteract : MonoBehaviour
                     itemSeguradoAtual = itemRetirado;
                     imagemUI.sprite = itemSeguradoAtual.iconeParaUI;
                     imagemUI.enabled = true;
+                    TocarSom(somPegarItem); // TOCA O SOM AQUI
                     return; 
                 }
             }
@@ -62,6 +69,7 @@ public class PlayerInteract : MonoBehaviour
             if (alavanca != null)
             {
                 alavanca.Interagir();
+                TocarSom(somInteragir); // TOCA O SOM AQUI
                 return; // Interagiu com a alavanca, encerra a função
             }
         }
@@ -79,13 +87,14 @@ public class PlayerInteract : MonoBehaviour
                 
                 Destroy(colisorChao.gameObject);
                 Debug.Log("Pegou do chão: " + itemSeguradoAtual.nomeVisivel);
+                TocarSom(somPegarItem); // TOCA O SOM AQUI
             }
         }
     }
 
    void SoltarItem()
    {
-       // 1. Tenta interagir com objetos próximos (Lixeira, Triturador ou Alavanca)
+       // 1. Tenta interagir com objetos próximos (Lixeira, Triturador, Ponto de Venda ou Alavanca)
        Collider2D[] colisoresProximos = Physics2D.OverlapCircleAll(transform.position, raioInteracao);
        foreach (Collider2D colisor in colisoresProximos)
        {
@@ -94,6 +103,7 @@ public class PlayerInteract : MonoBehaviour
            if (alavanca != null)
            {
                alavanca.Interagir();
+               TocarSom(somInteragir); // TOCA O SOM AQUI
                return; 
            }
 
@@ -104,25 +114,40 @@ public class PlayerInteract : MonoBehaviour
                 bool conseguiuDepositar = lixeira.ReceberItem(itemSeguradoAtual);
                 if (conseguiuDepositar)
                 {
+                    TocarSom(somSoltarItem); // TOCA O SOM AQUI
                     LimparMao();
                     return; // Se depositou, encerra a função
                 }
             }
 
-            // NOVA PARTE: Tenta colocar no Triturador
+            // Tenta colocar no Triturador
             Triturador triturador = colisor.GetComponent<Triturador>();
             if (triturador != null)
             {
                 bool conseguiuTriturar = triturador.ReceberItem(itemSeguradoAtual);
                 if (conseguiuTriturar)
                 {
+                    TocarSom(somSoltarItem); // TOCA O SOM AQUI
                     LimparMao();
                     return; // Se o triturador engoliu o item, encerra a função
                 }
             }
+
+            // NOVA PARTE: Tenta vender o item no Ponto de Venda
+            PontoDeVenda balcaoDeVenda = colisor.GetComponent<PontoDeVenda>();
+            if (balcaoDeVenda != null)
+            {
+                bool conseguiuVender = balcaoDeVenda.ReceberVenda(itemSeguradoAtual);
+                if (conseguiuVender)
+                {
+                    TocarSom(somSoltarItem); // TOCA O SOM AQUI (Pode ser um som de moedas depois!)
+                    LimparMao();
+                    return; // Vendeu com sucesso, encerra a função
+                }
+            }
         }
 
-        // 2. SE NÃO ACHOU LIXEIRA NEM TRITURADOR: Joga no chão
+        // 2. SE NÃO ACHOU OBJETOS FIXOS: Joga no chão
         if (prefabItemGenerico != null)
         {
             GameObject novoObjeto = Instantiate(prefabItemGenerico, transform.position, Quaternion.identity);
@@ -130,6 +155,8 @@ public class PlayerInteract : MonoBehaviour
             ItemColetavel scriptDoItem = novoObjeto.GetComponent<ItemColetavel>();
             
             if (scriptDoItem != null) scriptDoItem.ConfigurarItem(itemSeguradoAtual);
+            
+            TocarSom(somSoltarItem); // TOCA O SOM AQUI
         }
         else
         {
@@ -145,6 +172,15 @@ public class PlayerInteract : MonoBehaviour
         imagemUI.sprite = null;
         imagemUI.enabled = false;
         itemSeguradoAtual = null;
+    }
+
+    // Função auxiliar para tocar os sons facilmente e sem erros
+    private void TocarSom(AudioClip clipeDeSom)
+    {
+        if (audioInteracao != null && clipeDeSom != null)
+        {
+            audioInteracao.PlayOneShot(clipeDeSom);
+        }
     }
 
     private void OnDrawGizmosSelected()

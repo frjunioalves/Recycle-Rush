@@ -1,14 +1,25 @@
 using UnityEngine;
-using TMPro; // 1. IMPORTANTE: Biblioteca que controla os textos da UI
+using TMPro; // Biblioteca que controla os textos da UI
+using UnityEngine.UI; // Biblioteca necessária para manipular Imagens na UI
+using UnityEngine.SceneManagement; // Biblioteca para recarregar a cena (Restart)
+using UnityEngine.InputSystem; // <-- ESSA É A BIBLIOTECA QUE FALTAVA
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    [Header("Telas do Jogo (UI Panels)")]
+    public GameObject painelStart;
+    public GameObject painelPause;
+    public GameObject painelFimDeJogo;
+
     [Header("UI - Textos na Tela")]
-    // 2. Variáveis para você arrastar os textos lá no Inspector
     public TextMeshProUGUI textoDinheiro;
     public TextMeshProUGUI textoTempo;
+
+    [Header("UI - Corações (Vidas)")]
+    [Tooltip("Arraste os objetos de UI Image dos corações aqui")]
+    public Image[] coracoesUI; 
 
     [Header("Sistema de Dinheiro")]
     public int dinheiroAtual = 0;
@@ -16,7 +27,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Sistema de Tempo")]
     public float tempoRestante = 105f; 
-    public bool turnoAtivo = true;
+    public bool turnoAtivo = false; 
 
     [Header("Inventário Simples")]
     public int itensNaMao = 0;
@@ -27,11 +38,13 @@ public class GameManager : MonoBehaviour
     [Header("Configurações Globais da Esteira")]
     public float velocidadeGlobalEsteira = 2f;
     public float intervaloSpawnGlobal = 3f;
-    public bool esteiraAtiva = true; // Nova variável para ligar/desligar
+    public bool esteiraAtiva = true;
 
     [Header("Configurações Globais de Itens")]
-    [Tooltip("Controla o tamanho de todos os itens spawnados na esteira")]
     public float escalaGlobalItens = 1f;
+
+    private bool jogoPausado = false;
+    private bool jogoFinalizado = false;
 
     private void Awake()
     {
@@ -47,27 +60,34 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        // 3. Assim que o jogo começa, ele injeta os valores iniciais na tela
         AtualizarUIDinheiro();
+        AtualizarUIVidas(); 
+        
+        MostrarTelaStart();
     }
 
     private void Update()
     {
-        if (turnoAtivo)
+        // CORREÇÃO AQUI: Usando o Novo Input System para capturar a tecla ESC
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            if (turnoAtivo && !jogoFinalizado)
+            {
+                PausarOuRetomarJogo();
+            }
+        }
+
+        if (turnoAtivo && !jogoPausado && !jogoFinalizado)
         {
             tempoRestante -= Time.deltaTime; 
             
-            // 4. Atualiza o relógio visualmente frame a frame
             AtualizarUITempo(); 
 
             if (tempoRestante <= 0)
             {
                 tempoRestante = 0;
-                turnoAtivo = false;
-                
-                // Muda o texto para avisar que acabou
-                if(textoTempo != null) textoTempo.text = "FIM DE TURNO!";
-                Debug.Log("O TURNO ACABOU! Fim do expediente.");
+                AtualizarUITempo();
+                FinalizarJogo("FIM DE TURNO! O tempo acabou.");
             }
         }
     }
@@ -77,7 +97,6 @@ public class GameManager : MonoBehaviour
         dinheiroAtual += valor;
         Debug.Log($"Dinheiro atualizado: R$ {dinheiroAtual} / R$ {metaDinheiro}");
         
-        // 5. Atualiza a tela sempre que o dinheiro mudar
         AtualizarUIDinheiro(); 
         
         if (dinheiroAtual >= metaDinheiro)
@@ -94,21 +113,23 @@ public class GameManager : MonoBehaviour
 
     public void AplicarPenalidade()
     {
+        if (jogoFinalizado) return; 
+
         vidas--;
         Debug.Log("Item perdido! Penalidade aplicada. Vidas restantes: " + vidas);
 
+        AtualizarUIVidas(); 
+
         if (vidas <= 0)
         {
-            Debug.Log("Game Over!");
-            // Lógica de Game Over aqui
+            FinalizarJogo("GAME OVER! A empresa faliu (Você perdeu todas as vidas).");
         }
     }
 
-    // --- MÉTODOS PARA ATUALIZAR A INTERFACE (FRONT-END) ---
+    // --- MÉTODOS PARA ATUALIZAR A INTERFACE ---
 
     private void AtualizarUIDinheiro()
     {
-        // A checagem (!= null) evita erros caso você esqueça de arrastar o texto no Inspector
         if (textoDinheiro != null)
         {
             textoDinheiro.text = $"R$ {dinheiroAtual} / R$ {metaDinheiro}";
@@ -119,12 +140,75 @@ public class GameManager : MonoBehaviour
     {
         if (textoTempo != null)
         {
-            // Matemática simples para transformar os segundos flutuantes em "Minutos:Segundos"
             int minutos = Mathf.FloorToInt(tempoRestante / 60);
             int segundos = Mathf.FloorToInt(tempoRestante % 60);
             
-            // Formata a string para sempre ter 2 casas (ex: 01:05)
             textoTempo.text = string.Format("{0:00}:{1:00}", minutos, segundos);
         }
+    }
+
+    private void AtualizarUIVidas()
+    {
+        for (int i = 0; i < coracoesUI.Length; i++)
+        {
+            if (i < vidas) coracoesUI[i].enabled = true;
+            else coracoesUI[i].enabled = false;
+        }
+    }
+
+    // --- MÉTODOS DE CONTROLE DAS TELAS ---
+
+    public void MostrarTelaStart()
+    {
+        if(painelStart != null) painelStart.SetActive(true);
+        if(painelPause != null) painelPause.SetActive(false);
+        if(painelFimDeJogo != null) painelFimDeJogo.SetActive(false);
+        
+        Time.timeScale = 0f; 
+    }
+
+    public void IniciarJogo()
+    {
+        if(painelStart != null) painelStart.SetActive(false);
+        
+        Time.timeScale = 1f; 
+        turnoAtivo = true;
+    }
+
+    public void PausarOuRetomarJogo()
+    {
+        jogoPausado = !jogoPausado; 
+
+        if (jogoPausado)
+        {
+            if(painelPause != null) painelPause.SetActive(true);
+            Time.timeScale = 0f; 
+        }
+        else
+        {
+            if(painelPause != null) painelPause.SetActive(false);
+            Time.timeScale = 1f; 
+        }
+    }
+
+    public void BotaoRetomar() 
+    {
+        if (jogoPausado) PausarOuRetomarJogo();
+    }
+
+    private void FinalizarJogo(string mensagem)
+    {
+        Debug.Log(mensagem);
+        jogoFinalizado = true;
+        turnoAtivo = false;
+        
+        if(painelFimDeJogo != null) painelFimDeJogo.SetActive(true);
+        Time.timeScale = 0f; 
+    }
+
+    public void ReiniciarJogo()
+    {
+        Time.timeScale = 1f; 
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
