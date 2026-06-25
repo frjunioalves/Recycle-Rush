@@ -29,15 +29,23 @@ public class PlayerInteract : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        if (Keyboard.current != null)
         {
-            if (itemSeguradoAtual == null)
+            if (Keyboard.current.eKey.wasPressedThisFrame)
             {
-                TentarPegarItem();
+                if (itemSeguradoAtual == null)
+                {
+                    TentarPegarItem();
+                }
+                else
+                {
+                    SoltarItem();
+                }
             }
-            else
+
+            if (Keyboard.current.cKey.wasPressedThisFrame)
             {
-                SoltarItem();
+                TentarCancelarCrafting();
             }
         }
     }
@@ -60,6 +68,21 @@ public class PlayerInteract : MonoBehaviour
                     imagemUI.sprite = itemSeguradoAtual.iconeParaUI;
                     imagemUI.enabled = true;
                     TocarSom(somPegarItem); // TOCA O SOM AQUI
+                    return; 
+                }
+            }
+
+            // Tenta ver se é uma Bancada para retirar o último item colocado
+            BancadaCrafting bancada = colisor.GetComponent<BancadaCrafting>();
+            if (bancada != null)
+            {
+                ItemData itemRetirado = bancada.RetirarItem();
+                if (itemRetirado != null)
+                {
+                    itemSeguradoAtual = itemRetirado;
+                    imagemUI.sprite = itemSeguradoAtual.iconeParaUI;
+                    imagemUI.enabled = true;
+                    TocarSom(somPegarItem); 
                     return; 
                 }
             }
@@ -92,7 +115,23 @@ public class PlayerInteract : MonoBehaviour
         }
     }
 
-   void SoltarItem()
+    private void TentarCancelarCrafting()
+    {
+        Collider2D[] colisoresProximos = Physics2D.OverlapCircleAll(transform.position, raioInteracao);
+        
+        foreach (Collider2D colisor in colisoresProximos)
+        {
+            BancadaCrafting bancada = colisor.GetComponent<BancadaCrafting>();
+            if (bancada != null)
+            {
+                bancada.CancelarCrafting();
+                TocarSom(somSoltarItem);
+                return; // Sai do loop após cancelar
+            }
+        }
+    }
+
+    void SoltarItem()
    {
        // 1. Tenta interagir com objetos próximos (Lixeira, Triturador, Ponto de Venda ou Alavanca)
        Collider2D[] colisoresProximos = Physics2D.OverlapCircleAll(transform.position, raioInteracao);
@@ -143,6 +182,19 @@ public class PlayerInteract : MonoBehaviour
                     TocarSom(somSoltarItem); // TOCA O SOM AQUI (Pode ser um som de moedas depois!)
                     LimparMao();
                     return; // Vendeu com sucesso, encerra a função
+                }
+            }
+
+            // Tenta colocar na Bancada de Crafting
+            BancadaCrafting bancada = colisor.GetComponent<BancadaCrafting>();
+            if (bancada != null)
+            {
+                bool conseguiuDepositar = bancada.ReceberItem(itemSeguradoAtual);
+                if (conseguiuDepositar)
+                {
+                    TocarSom(somSoltarItem); 
+                    LimparMao();
+                    return; 
                 }
             }
         }

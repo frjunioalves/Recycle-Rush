@@ -2,7 +2,7 @@ using UnityEngine;
 using System; 
 
 // 1. ATUALIZAÇÃO: Novas categorias baseadas na coleta seletiva real
-public enum CategoriaItem { Papel, Plastico, Metal, Vidro, Organico, NaoReciclavel }
+public enum CategoriaItem { Papel, Plastico, Metal, Vidro, Organico, NaoReciclavel, Craftavel }
 
 [CreateAssetMenu(fileName = "NovoItem", menuName = "Sistema de Itens/Item")]
 public class ItemData : ScriptableObject

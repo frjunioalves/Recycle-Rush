@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d91e254d2ceed3c4aad2600d461e9ee0, type: 3}
+  m_Name: pote_geleia
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  idItemAutomatico: 858b171e-a86e-4320-903b-8b6bff7109a0
+  nomeVisivel: "Pote de Gel\xE9ia Vazio"
+  categoria: 3
+  iconeParaUI: {fileID: -6159355643759141166, guid: 630f0fc7c8bcacc4b900b9b61393bf95, type: 3}
+  valorVenda: 3

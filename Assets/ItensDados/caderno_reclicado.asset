@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d91e254d2ceed3c4aad2600d461e9ee0, type: 3}
+  m_Name: caderno_reclicado
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  idItemAutomatico: 3c50c0f8-4b45-4437-adc3-0570e060d018
+  nomeVisivel: Caderno Reclicado
+  categoria: 6
+  iconeParaUI: {fileID: 768539965427458729, guid: 58639c4b2ed529c4dbfd21011cda582e, type: 3}
+  valorVenda: 15

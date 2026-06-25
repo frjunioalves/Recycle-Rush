@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d91e254d2ceed3c4aad2600d461e9ee0, type: 3}
+  m_Name: drone_de_sucata
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  idItemAutomatico: 3217f66f-39b3-4b3a-a6e5-b4087f251338
+  nomeVisivel: Drone de Sucata
+  categoria: 6
+  iconeParaUI: {fileID: 8540916072121935540, guid: 58639c4b2ed529c4dbfd21011cda582e, type: 3}
+  valorVenda: 25
